@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      routes:
+        - id: RATE-SERVICE
+          uri: lb://RATE-SERVICE
+          predicates:
+            - Path=/rate-service/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: RATE-SERVICE
+                fallbackuri: forward:/rateServiceFallBack
+
+hystrix:
+  command:
+    fallbackcmd:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+okta:
+  oauth2:
+    issuer: https://dev-14250978.okta.com/oauth2/default
+    client-id: 0oau3ipclIl15osxv5d6
+    client-secret: kydl6e3yPWO-rSmmIwvYfBycANVWt8Ueyda73SPJ
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+
+#https://dev-14250978.okta.com/oauth2/v1/authorize?client_id=0oau3ipclIl15osxv5d6&response_type=token&response_mode=fragment&scope=okta.users.read&redirect_uri=http://localhost:8080/login/oauth2/code/okta&nonce=UBGW&state=1234
